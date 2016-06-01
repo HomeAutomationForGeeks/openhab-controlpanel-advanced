@@ -50,6 +50,9 @@ function BuildWidgets()
 			case "sensor":
 				widget.html("<span class=\"icon\">?</span><h3>" + widget.data("title") + "</h3>");
 				break;
+			case "rollershutter":
+				widget.html("<span class=\"icon\">?</span><h3><i class=\"fa fa-arrow-circle-up\"></i>&nbsp;" + widget.data("title") + "&nbsp;<i class=\"fa fa-arrow-circle-down\"></i></h3>");
+				break;
 		}
 	});
 }
@@ -141,6 +144,7 @@ function DisplayItemState(widget, state)
 			}
 			break;
 		case "sensor":
+		case "rollershutter":
 			if (isNaN(state)) {
 				state = "-";
 			}
@@ -316,7 +320,7 @@ $(document).on("mousedown", "div.weather_forecast", function(){
 });
 
 // Capture clicks: Widgets
-$(document).on("mousedown", "widget", function(){
+$(document).on("mousedown", "widget", function(event){
 	var widget = $(this);
 	
 	Log("Clicked widget: " + widget.data("title") + " of type '" + widget.data("type") + "'", 2);
@@ -334,6 +338,31 @@ $(document).on("mousedown", "widget", function(){
 		}).fail( function(jqXHR, data) { 
 			Log("Error on tap: " + data, 1);
 		});
+	} else if(widget.data("type") === "rollershutter") {
+		var midx=widget.prop("offsetLeft")+widget.prop("offsetWidth")/2;
+		var midy=widget.prop("offsetTop")+widget.prop("offsetHeight")/2;
+		
+		if(event.clientY>midy)
+		{
+		    var cmd;
+		    if(event.clientX>midx)
+		        cmd="DOWN";
+		    else
+			cmd="UP";
+		    Log(cmd+" client.x="+event.clientX+" midx="+midx+ "  client.y="+event.clientY+" , midy="+  midy,2);
+		$.ajax({
+			type: "POST",
+			url: "http://" + openhabURL + widget.data("item"),
+			data: cmd, 
+			headers: { "Content-Type": "text/plain" }
+		})
+		.done(function(data) {
+			Log("Command sent", 2);
+		}).fail( function(jqXHR, data) { 
+			Log("Error on tap: " + data, 1);
+		});
+		}
+		
 	} else if (widget.data("history")) {
 		// Clicked on a widget that has history data: toggle between main mode and history mode
 		var widgetmode = widget.data("mode") || "main";
