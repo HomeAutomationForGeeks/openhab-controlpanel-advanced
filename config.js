@@ -21,3 +21,8 @@ var forecastFrequency = 3600000;	// every 3600 seconds (= 1 hour)
 
 var reloadHour = 4;	// time at which to reload the entire page. Helps keep things fresh (Chrome tends to time out the websockets). 24 hour format (0 = midnight, 23 = 11 PM)
 
+var weatherUnit = "fc"; //c for celsius, f for farenheit, cf for celsius (farenheit), fc for farenheit (celsius)
+var tempRound = false;	//rounds all temperatures to whole numbers (so today and forecast match)
+
+var twelveHour = false;	//if true, time is displayed as 12-hour rather than 24-hour
+var twelveHourAMPM = true;	//if true, 'am' or 'pm' is appended to the time. Probably doesn't make sense unless twelveHour is also true.

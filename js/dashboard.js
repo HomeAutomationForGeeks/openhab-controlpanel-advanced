@@ -17,7 +17,7 @@ function Start()
 function StartTime() {
 	var today = new Date();
 
-	$("div.clock").html(today.getHours() + ":" + ToDoubleDigits(today.getMinutes()));
+	$("div.clock").html((twelveHour == true ? (today.getHours() % 12 || 12) : today.getHours())+ ":" + ToDoubleDigits(today.getMinutes()) + (twelveHourAMPM == true ? (today.getHours() >= 12 ? 'pm' : 'am') : ""));	// + " " + (today.getHours() >= 12 ? 'pm' : 'am')
 	$("div.date").html(today.toDateString());
 	
 	if (today.getHours() == reloadHour && today.getMinutes() == 0 && secondsSinceLoad > 600) {	// The extra checks besides reloadHour are to make sure we don't reload every second when we hit reloadHour
@@ -243,8 +243,8 @@ function GetWeatherConditions()
 		// The weather service sends back a lot of data, but we'll only use some
 		$("#observation_icon").attr("src", "weather/" + data.current_observation.icon + ".png");
 		$("#observation_weather").html(ParseWeatherConditions(data.current_observation.weather));
-		$("#observation_temperature").html(data.current_observation.temperature_string);
-		$("#observation_feelslike").html("feels like: " + data.current_observation.feelslike_string);
+		$("#observation_temperature").html(formatTemperature(data.current_observation.temp_c,data.current_observation.temp_f));
+		$("#observation_feelslike").html("feels like: " + formatTemperature(data.current_observation.feelslike_c,data.current_observation.feelslike_f));
 		$("#observation_time").html(data.current_observation.observation_time);
 	}).fail( function(jqXHR, data) { 
 		Log("Error getting weather: " + data, 1);
@@ -270,15 +270,15 @@ function GetWeatherForecast()
 		$("#forecast_title", "#weather_today").html(data.forecast.simpleforecast.forecastday[0].date.weekday);
 		$("#forecast_icon", "#weather_today").attr("src", "weather/" + data.forecast.simpleforecast.forecastday[0].icon + ".png");
 		$("#forecast_conditions", "#weather_today").html(ParseWeatherConditions(data.forecast.simpleforecast.forecastday[0].conditions));
-		$("#forecast_high", "#weather_today").html(data.forecast.simpleforecast.forecastday[0].high.fahrenheit + "F (" + data.forecast.simpleforecast.forecastday[0].high.celsius + "C)");
-		$("#forecast_low", "#weather_today").html(data.forecast.simpleforecast.forecastday[0].low.fahrenheit + "F (" + data.forecast.simpleforecast.forecastday[0].low.celsius + "C)");
-		
+		$("#forecast_high", "#weather_today").html(formatTemperature(data.forecast.simpleforecast.forecastday[0].high.celsius,data.forecast.simpleforecast.forecastday[0].high.fahrenheit));
+		$("#forecast_low", "#weather_today").html(formatTemperature(data.forecast.simpleforecast.forecastday[0].low.celsius,data.forecast.simpleforecast.forecastday[0].low.fahrenheit));
+
 		$("#forecast_title", "#weather_tomorrow").html(data.forecast.simpleforecast.forecastday[1].date.weekday);
 		$("#forecast_icon", "#weather_tomorrow").attr("src", "weather/" + data.forecast.simpleforecast.forecastday[1].icon + ".png");
 		$("#forecast_conditions", "#weather_tomorrow").html(ParseWeatherConditions(data.forecast.simpleforecast.forecastday[1].conditions));
-		$("#forecast_high", "#weather_tomorrow").html(data.forecast.simpleforecast.forecastday[1].high.fahrenheit + "F (" + data.forecast.simpleforecast.forecastday[1].high.celsius + "C)");
-		$("#forecast_low", "#weather_tomorrow").html(data.forecast.simpleforecast.forecastday[1].low.fahrenheit + "F (" + data.forecast.simpleforecast.forecastday[1].low.celsius + "C)");
-		
+		$("#forecast_high", "#weather_tomorrow").html(formatTemperature(data.forecast.simpleforecast.forecastday[1].high.celsius,data.forecast.simpleforecast.forecastday[1].high.fahrenheit));
+		$("#forecast_low", "#weather_tomorrow").html(formatTemperature(data.forecast.simpleforecast.forecastday[1].low.celsius,data.forecast.simpleforecast.forecastday[1].low.fahrenheit));
+
 		$("#forecast_time").html("Forecast Time: " + data.forecast.txt_forecast.date);
 		
 		// After 5 PM: show tomorrow's forecast. Before 5 PM: show today's.
@@ -413,3 +413,23 @@ String.prototype.format = function() {
     }
     return s;
 };
+
+function formatTemperature(c, f) {
+	tempC_suffix = "C";
+	tempF_suffix = "F";
+
+	if (tempRound == true) {
+    	c = Math.round(c).toString();
+    	f = Math.round(f).toString();
+	}	
+
+	if (weatherUnit == "c"){
+		return (c + tempC_suffix);
+	} else if (weatherUnit == "f") {
+		return (f + tempF_suffix);
+	} else if (weatherUnit == "cf") {
+		return (c + tempC_suffix + " (" + f + tempF_suffix + ")");
+	} else {
+		return (f + tempF_suffix + " (" + c + tempC_suffix + ")");
+	}
+}
