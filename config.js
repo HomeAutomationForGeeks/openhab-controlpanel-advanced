@@ -24,3 +24,5 @@ var reloadHour = 4;	// time at which to reload the entire page. Helps keep thing
 var weatherUnit = "fc"; //c for celsius, f for farenheit, cf for celsius (farenheit), fc for farenheit (celsius)
 var tempRound = false;	//rounds all temperatures to whole numbers (so today and forecast match)
 
+var twelveHour = false;	//if true, time is displayed as 12-hour rather than 24-hour
+var twelveHourAMPM = true;	//if true, 'am' or 'pm' is appended to the time. Probably doesn't make sense unless twelveHour is also true.
